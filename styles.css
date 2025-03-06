@@ -1,0 +1,300 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.container {
+    text-align: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    max-width: 800px;
+    width: 95%;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-size: 2.5em;
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+.game-types, .difficulty {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.game-type, .diff-btn {
+    padding: 8px 15px;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.game-type.active, .diff-btn.active {
+    background: #4CAF50;
+    transform: scale(1.05);
+}
+
+.game-type:hover, .diff-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.stats {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.moves, .high-score {
+    font-size: 1.2em;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: color 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+#resetButton {
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #4CAF50;
+}
+
+#resetButton:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.game-board.medium {
+    grid-template-columns: repeat(6, 1fr);
+    max-width: 600px;
+}
+
+.game-board.hard {
+    grid-template-columns: repeat(8, 1fr);
+    max-width: 800px;
+}
+
+.card {
+    aspect-ratio: 1;
+    background: rgba(33, 150, 243, 0.8);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.6s, background-color 0.3s ease;
+    transform-style: preserve-3d;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-height: 60px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    perspective: 1000px;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+.card.matched {
+    transform: rotateY(180deg);
+    cursor: default;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.card-front {
+    transform: rotateY(180deg);
+    background: rgba(21, 101, 192, 0.9);
+    color: white;
+}
+
+.card-back {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.9), rgba(21, 101, 192, 0.9));
+    transform: rotateY(0deg);
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+        width: 98%;
+        margin: 10px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin-bottom: 15px;
+    }
+
+    .controls {
+        margin-bottom: 15px;
+    }
+
+    .game-types, .difficulty {
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 5px;
+    }
+
+    .game-type, .diff-btn {
+        font-size: 0.8em;
+        padding: 6px 12px;
+        min-width: 70px;
+    }
+
+    .stats {
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .moves, .high-score {
+        font-size: 1em;
+        padding: 8px 15px;
+    }
+
+    #resetButton {
+        font-size: 0.9em;
+        padding: 8px 15px;
+    }
+
+    .game-board {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        padding: 8px;
+        max-width: 95vw;
+    }
+
+    .game-board.medium {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 95vw;
+    }
+
+    .game-board.hard {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 95vw;
+    }
+
+    .card {
+        min-height: 40px;
+        border-radius: 4px;
+    }
+
+    .card:hover {
+        transform: none;
+    }
+
+    .card-front, .card-back {
+        font-size: 1.2em;
+        border-radius: 4px;
+    }
+
+    .card.matched {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    }
+
+    .card {
+        transition: transform 0.4s, background-color 0.2s ease;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+        100% {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+    }
+
+    .card:active {
+        transform: scale(0.95);
+    }
+} 
