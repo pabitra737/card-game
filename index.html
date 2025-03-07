@@ -3,33 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Matching Game</title>
+    <title>Memory Match Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Card Matching Game</h1>
-        <div class="controls">
-            <div class="game-types">
-                <button class="game-type active" data-type="emoji">Emoji</button>
-                <button class="game-type" data-type="numbers">Numbers</button>
-                <button class="game-type" data-type="letters">Letters</button>
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Welcome Page -->
+    <div id="welcomePage" class="page">
+        <div class="welcome-content animate__animated animate__fadeIn">
+            <h1 class="game-title">Memory Match</h1>
+            <div class="animated-cards">
+                <div class="intro-card">🎮</div>
+                <div class="intro-card">🧩</div>
+                <div class="intro-card">🎯</div>
             </div>
-            <div class="difficulty">
-                <button class="diff-btn active" data-size="8">Easy (8)</button>
-                <button class="diff-btn" data-size="12">Medium (12)</button>
-                <button class="diff-btn" data-size="16">Hard (16)</button>
-            </div>
-        </div>
-        <div class="stats">
-            <span class="moves">Moves: <span id="moveCount">0/30</span></span>
-            <span class="high-score">Best Score: <span id="highScore">-</span></span>
-            <button id="resetButton">Reset Game</button>
-        </div>
-        <div class="game-board" id="gameBoard">
-            <!-- Cards will be generated here -->
+            <button id="startBtn" class="btn-primary">
+                Start Game
+                <div class="btn-shine"></div>
+            </button>
         </div>
     </div>
+
+    <!-- Selection Page -->
+    <div id="selectionPage" class="page" style="display: none;">
+        <div class="selection-content animate__animated animate__fadeIn">
+            <h2 class="game-title">Game Setup</h2>
+            <div class="selection-container">
+                <div class="selection-group">
+                    <h3>Game Type</h3>
+                    <div class="game-types">
+                        <button class="game-type active" data-type="numbers">
+                            <span class="icon">🔢</span>
+                            <span class="text">Numbers</span>
+                            <span class="sub-text">Match identical numbers</span>
+                        </button>
+                        <button class="game-type" data-type="emojis">
+                            <span class="icon">😊</span>
+                            <span class="text">Emojis</span>
+                            <span class="sub-text">Match emoji pairs</span>
+                        </button>
+                        <button class="game-type" data-type="colors">
+                            <span class="icon">🎨</span>
+                            <span class="text">Colors</span>
+                            <span class="sub-text">Match color pairs</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="selection-group">
+                    <h3>Difficulty</h3>
+                    <div class="difficulty">
+                        <button class="diff-btn active" data-difficulty="easy">
+                            <span class="icon">🌟</span>
+                            <span class="text">Easy</span>
+                            <span class="sub-text">4x4 grid (8 pairs)</span>
+                        </button>
+                        <button class="diff-btn" data-difficulty="medium">
+                            <span class="icon">🌟🌟</span>
+                            <span class="text">Medium</span>
+                            <span class="sub-text">6x6 grid (18 pairs)</span>
+                        </button>
+                        <button class="diff-btn" data-difficulty="hard">
+                            <span class="icon">🌟🌟🌟</span>
+                            <span class="text">Hard</span>
+                            <span class="sub-text">8x8 grid (32 pairs)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button id="playBtn" class="btn-primary">
+                Play Game
+                <div class="btn-shine"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Page -->
+    <div id="gamePage" class="page" style="display: none;">
+        <div class="game-container glass-effect">
+            <div class="stats-container">
+                <div class="stat-box">
+                    <span class="stat-label">Moves</span>
+                    <span id="moveCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">High Score</span>
+                    <span id="highScore" class="stat-value">-</span>
+                </div>
+                <button id="resetBtn" class="btn-primary">
+                    Reset
+                    <div class="btn-shine"></div>
+                </button>
+                <button id="menuBtn" class="btn-primary">
+                    Menu
+                    <div class="btn-shine"></div>
+                </button>
+            </div>
+            <div class="game-board"></div>
+        </div>
+    </div>
+
+    <!-- Victory Page -->
+    <div id="victoryPage" class="page" style="display: none;">
+        <div class="victory-content animate__animated animate__zoomIn">
+            <div class="trophy-container">
+                <div class="trophy">🏆</div>
+                <div class="trophy-sparkles"></div>
+            </div>
+            <h2 class="game-title">Victory!</h2>
+            <div class="victory-stats">
+                <div class="stat-item">
+                    <div class="label">Total Moves</div>
+                    <div id="finalMoves" class="value">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Score</div>
+                    <div id="victoryHighScore" class="value">High Score: 0</div>
+                </div>
+            </div>
+            <div class="victory-buttons">
+                <button id="playAgainBtn" class="btn-primary">
+                    Play Again
+                    <div class="btn-shine"></div>
+                </button>
+                <button id="newGameBtn" class="btn-primary">
+                    New Game
+                    <div class="btn-shine"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html> 

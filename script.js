@@ -153,306 +153,347 @@ function createButtonClickSound() {
     createSound(NOTES.G5, 0.08, 'triangle', 0.1);
 }
 
+// Initialize Particles.js
+particlesJS('particles-js', {
+    particles: {
+        number: { value: 80, density: { enable: true, value_area: 800 } },
+        color: { value: '#ffffff' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.5, random: true },
+        size: { value: 3, random: true },
+        move: {
+            enable: true,
+            speed: 2,
+            direction: 'none',
+            random: true,
+            out_mode: 'out'
+        }
+    }
+});
+
 // Game state
+let gameType = 'numbers';
+let difficulty = 'easy';
 let cards = [];
 let flippedCards = [];
 let matchedPairs = 0;
-let moves = 0;
-let moveLimit = 30;
+let moveCount = 0;
 let gameStarted = false;
-let highScore = localStorage.getItem('highScore') || '-';
-let currentGameType = 'emoji';
-let currentSize = 8;
-
-// Game symbols for different types
-const gameSymbols = {
-    emoji: ['🎮', '🎲', '🎯', '🎨', '🎭', '🎪', '🎟️', '🎬', '🎸', '🎺', '🎨', '🎭', '🎪', '🎟️', '🎬', '🎮'],
-    numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'],
-    letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
+let highScores = JSON.parse(localStorage.getItem('highScores')) || {
+    numbers: { easy: Infinity, medium: Infinity, hard: Infinity },
+    emojis: { easy: Infinity, medium: Infinity, hard: Infinity },
+    colors: { easy: Infinity, medium: Infinity, hard: Infinity }
 };
 
-// Game type descriptions
-const gameTypeDesc = {
-    emoji: 'Match the emoji pairs',
-    numbers: 'Match the number pairs',
-    letters: 'Match the letter pairs'
+// Game configuration
+const config = {
+    easy: { pairs: 8, cols: 4 },
+    medium: { pairs: 18, cols: 6 },
+    hard: { pairs: 32, cols: 8 }
 };
 
-// Move limits for different game types and difficulties
-const moveLimits = {
-    emoji: {
-        8: 20,    // Easy
-        12: 35,   // Medium
-        16: 50    // Hard
-    },
-    numbers: {
-        8: 15,    // Easy
-        12: 30,   // Medium
-        16: 45    // Hard
-    },
-    letters: {
-        8: 18,    // Easy
-        12: 32,   // Medium
-        16: 48    // Hard
+const gameContent = {
+    numbers: Array.from({ length: 32 }, (_, i) => i + 1),
+    emojis: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🦄',
+             '🐙', '🦋', '🦀', '🐠', '🐳', '🦕', '🦖', '🐉', '🐝', '🦩', '🦚', '🦜', '🐢', '🐍', '🦎', '🦔'],
+    colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B9B9B', '#A8E6CF',
+             '#FF8B94', '#FFD93D', '#6C5B7B', '#C06C84', '#F67280', '#355C7D', '#F8B195', '#F67280',
+             '#2A363B', '#E84A5F', '#FF847C', '#FECEA8', '#99B898', '#FECEAB', '#FF847C', '#E84A5F',
+             '#2A363B', '#F8B195', '#F67280', '#C06C84', '#6C5B7B', '#355C7D', '#99B898', '#FECEA8']
+};
+
+// Page Management
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+    document.getElementById(pageId).style.display = 'block';
+    
+    if (pageId === 'gamePage') {
+        initializeGame();
     }
-};
+}
 
-// DOM elements
-const gameBoard = document.getElementById('gameBoard');
-const moveCount = document.getElementById('moveCount');
-const highScoreDisplay = document.getElementById('highScore');
-const resetButton = document.getElementById('resetButton');
-const gameTypeButtons = document.querySelectorAll('.game-type');
-const difficultyButtons = document.querySelectorAll('.diff-btn');
+// Game Type Selection
+function setGameType(type) {
+    gameType = type;
+    document.querySelectorAll('.game-type').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-type="${type}"]`).classList.add('active');
+}
 
-// Initialize game function
+// Difficulty Selection
+function setDifficulty(diff) {
+    difficulty = diff;
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-difficulty="${diff}"]`).classList.add('active');
+}
+
+// Game Initialization
 function initializeGame() {
-    // Initialize sounds if not already done
-    initializeSounds();
-    
-    // Reset game state
-    cards = [];
-    flippedCards = [];
+    moveCount = 0;
     matchedPairs = 0;
-    moves = 0;
+    flippedCards = [];
     gameStarted = false;
-    moveCount.style.color = 'white';
-    updateStats();
-    gameBoard.innerHTML = '';
-
-    // Update high score display for current game type and size
-    const scoreKey = `highScore_${currentGameType}_${currentSize}`;
-    highScore = localStorage.getItem(scoreKey) || '-';
-    highScoreDisplay.textContent = highScore;
-
-    // Get symbols for current game type and size
-    const symbols = gameSymbols[currentGameType].slice(0, currentSize);
-    const cardPairs = [...symbols, ...symbols];
     
-    // Shuffle cards
-    for (let i = cardPairs.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [cardPairs[i], cardPairs[j]] = [cardPairs[j], cardPairs[i]];
-    }
+    updateStats();
+    createGameBoard();
+}
 
-    // Update game board layout
-    updateGridLayout();
-
-    // Create card elements
-    cardPairs.forEach((symbol, index) => {
+function createGameBoard() {
+    const gameBoard = document.querySelector('.game-board');
+    const { pairs, cols } = config[difficulty];
+    gameBoard.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    
+    // Create card content
+    let content = gameContent[gameType].slice(0, pairs);
+    content = [...content, ...content];
+    content.sort(() => Math.random() - 0.5);
+    
+    // Clear existing board
+    gameBoard.innerHTML = '';
+    
+    // Create cards
+    content.forEach((value, index) => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `
-            <div class="card-front">${symbol}</div>
-            <div class="card-back"></div>
-        `;
-        card.dataset.symbol = symbol;
         card.dataset.index = index;
-        card.addEventListener('click', handleCardClick);
-        card.addEventListener('touchstart', handleCardClick, { passive: false });
+        card.dataset.value = value;
+        
+        const front = document.createElement('div');
+        front.className = 'card-front';
+        
+        const back = document.createElement('div');
+        back.className = 'card-back';
+        back.innerHTML = '❓';
+        
+        // Set content based on game type
+        if (gameType === 'colors') {
+            front.classList.add('color-card');
+            front.style.backgroundColor = value;
+            
+            // Add color swatch container
+            const colorSwatch = document.createElement('div');
+            colorSwatch.style.width = '100%';
+            colorSwatch.style.height = '100%';
+            colorSwatch.style.backgroundColor = value;
+            colorSwatch.style.borderRadius = 'inherit';
+            front.appendChild(colorSwatch);
+        } else {
+            const contentSpan = document.createElement('span');
+            contentSpan.textContent = value;
+            contentSpan.style.pointerEvents = 'none';
+            front.appendChild(contentSpan);
+        }
+        
+        card.appendChild(back);
+        card.appendChild(front);
+        
+        // Add click event
+        card.addEventListener('click', () => handleCardClick(card));
+        
         gameBoard.appendChild(card);
-        cards.push(card);
     });
-
-    // Show game type info
-    const gameInfo = `${gameTypeDesc[currentGameType]} - ${moveLimit} moves limit`;
-    alert(gameInfo);
-}
-
-// Update grid layout based on card count
-function updateGridLayout() {
-    const isMobile = window.innerWidth <= 600;
     
-    // Remove existing difficulty classes
-    gameBoard.classList.remove('medium', 'hard');
-    
-    // Add appropriate difficulty class
-    if (currentSize > 8) {
-        if (currentSize <= 12) {
-            gameBoard.classList.add('medium');
-        } else {
-            gameBoard.classList.add('hard');
-        }
-    }
-    
-    if (isMobile) {
-        gameBoard.style.gridTemplateColumns = 'repeat(4, 1fr)';
-    } else {
-        if (currentSize <= 8) {
-            gameBoard.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        } else if (currentSize <= 12) {
-            gameBoard.style.gridTemplateColumns = 'repeat(6, 1fr)';
-        } else {
-            gameBoard.style.gridTemplateColumns = 'repeat(8, 1fr)';
-        }
-    }
+    cards = Array.from(document.querySelectorAll('.card'));
 }
 
-// Update stats display
-function updateStats() {
-    moveCount.textContent = `${moves}/${moveLimit}`;
-    if (moves >= moveLimit - 5) {
-        moveCount.style.color = '#FF6B6B';
-    }
-}
-
-// Update move limit based on game type and difficulty
-function updateMoveLimit() {
-    moveLimit = moveLimits[currentGameType][currentSize];
-    updateStats();
-}
-
-// Handle game type selection
-function handleGameTypeChange(e) {
-    const button = e.target;
-    gameTypeButtons.forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
-    currentGameType = button.dataset.type;
-    updateMoveLimit();
-    initializeGame();
-}
-
-// Handle difficulty selection
-function handleDifficultyChange(e) {
-    const button = e.target;
-    difficultyButtons.forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
-    currentSize = parseInt(button.dataset.size);
-    updateMoveLimit();
-    initializeGame();
-}
-
-// Add event listeners
-gameTypeButtons.forEach(button => {
-    button.addEventListener('click', handleGameTypeChange);
-});
-
-difficultyButtons.forEach(button => {
-    button.addEventListener('click', handleDifficultyChange);
-});
-
-// Initialize touch events
-initializeTouchEvents();
-
-// Start game
-initializeGame();
-
-// Add window resize listener
-window.addEventListener('resize', updateGridLayout);
-
-// Handle card click
-function handleCardClick(e) {
-    const card = e.currentTarget;
-    
-    // Prevent clicking if card is already flipped, matched, or moves exceeded
-    if (card.classList.contains('flipped') || 
-        card.classList.contains('matched') || 
-        flippedCards.length >= 2 ||
-        moves >= moveLimit) {
-        return;
-    }
-
-    // Start game if first move
+// Card Click Handler
+function handleCardClick(card) {
     if (!gameStarted) {
         gameStarted = true;
-    }
-
-    // Flip card
-    flipCard(card);
-
-    // Check for match
-    if (flippedCards.length === 2) {
-        moves++;
         updateStats();
-        checkMatch();
-        
-        // Check if moves limit reached
-        if (moves >= moveLimit && matchedPairs < currentSize) {
-            setTimeout(() => {
-                playSound('gameOver');
-                alert(`Game Over! You've reached the move limit (${moveLimit}). Try again!`);
-                initializeGame();
-            }, 500);
-        }
     }
-}
-
-// Flip card animation
-function flipCard(card) {
+    
+    if (
+        flippedCards.length >= 2 ||
+        flippedCards.includes(card) ||
+        card.classList.contains('matched')
+    ) {
+        return;
+    }
+    
+    playSound('flip');
     card.classList.add('flipped');
     flippedCards.push(card);
-    playSound('flip');
+    
+    if (flippedCards.length === 2) {
+        moveCount++;
+        updateStats();
+        checkMatch();
+    }
 }
 
-// Check if flipped cards match
+// Match Checking
 function checkMatch() {
     const [card1, card2] = flippedCards;
-    const match = card1.dataset.symbol === card2.dataset.symbol;
-
-    if (match) {
-        matchedPairs++;
-        const symbolIndex = parseInt(card1.dataset.index) % currentSize;
-        const pairColor = pairColors[symbolIndex];
-        
-        card1.classList.add('matched');
-        card2.classList.add('matched');
-        card1.style.background = pairColor;
-        card2.style.background = pairColor;
-        card1.querySelector('.card-front').style.background = pairColor;
-        card2.querySelector('.card-front').style.background = pairColor;
-        
-        playSound('match');
-        
-        if (matchedPairs === currentSize) {
-            setTimeout(() => {
-                playSound('victory');
-                const isNewHighScore = updateHighScore();
-                const message = isNewHighScore 
-                    ? `🎉 New High Score! You won in ${moves} moves!` 
-                    : `Congratulations! You won in ${moves} moves!`;
-                alert(message);
-                initializeGame();
-            }, 500);
-        }
-    } else {
-        setTimeout(() => {
-            card1.classList.remove('flipped');
-            card2.classList.remove('flipped');
-        }, 1000);
-    }
-
-    flippedCards = [];
-}
-
-// Update high score
-function updateHighScore() {
-    const scoreKey = `highScore_${currentGameType}_${currentSize}`;
-    const currentHighScore = localStorage.getItem(scoreKey) || '-';
+    const match = isMatch(card1, card2);
     
-    if (currentHighScore === '-' || moves < parseInt(currentHighScore)) {
-        localStorage.setItem(scoreKey, moves.toString());
-        highScoreDisplay.textContent = moves;
-        return true;
+    if (match) {
+        handleMatch(card1, card2);
+    } else {
+        handleMismatch(card1, card2);
     }
-    return false;
 }
 
-// Card colors for matched pairs
-const pairColors = [
-    '#FF6B6B', // Red
-    '#4ECDC4', // Turquoise
-    '#45B7D1', // Light Blue
-    '#96CEB4', // Mint
-    '#FFEEAD', // Light Yellow
-    '#D4A5A5', // Dusty Rose
-    '#9B59B6', // Purple
-    '#3498DB',  // Blue
-    '#E74C3C', // Bright Red
-    '#F1C40F', // Yellow
-    '#2ECC71', // Green
-    '#E67E22', // Orange
-    '#1ABC9C', // Turquoise
-    '#9B59B6', // Purple
-    '#34495E', // Navy Blue
-    '#16A085'  // Sea Green
-];
+function isMatch(card1, card2) {
+    if (gameType === 'colors') {
+        const color1 = card1.querySelector('.color-card').style.backgroundColor;
+        const color2 = card2.querySelector('.color-card').style.backgroundColor;
+        return color1 === color2;
+    }
+    return card1.dataset.value === card2.dataset.value;
+}
+
+function getCardValue(card) {
+    return card.dataset.value;
+}
+
+function handleMatch(card1, card2) {
+    playSound('match');
+    card1.classList.add('matched');
+    card2.classList.add('matched');
+    matchedPairs++;
+    flippedCards = [];
+    
+    if (matchedPairs === config[difficulty].pairs) {
+        setTimeout(() => {
+            playSound('victory');
+            handleVictory();
+        }, 500);
+    }
+}
+
+function handleMismatch(card1, card2) {
+    setTimeout(() => {
+        card1.classList.remove('flipped');
+        card2.classList.remove('flipped');
+        flippedCards = [];
+    }, 1000);
+}
+
+// Stats Update
+function updateStats() {
+    document.getElementById('moveCount').textContent = moveCount;
+    const highScore = highScores[gameType][difficulty];
+    document.getElementById('highScore').textContent = highScore === Infinity ? '-' : highScore;
+}
+
+// Victory Handling
+function handleVictory() {
+    const isHighScore = moveCount < (highScores[gameType][difficulty] || Infinity);
+    if (isHighScore) {
+        highScores[gameType][difficulty] = moveCount;
+        localStorage.setItem('highScores', JSON.stringify(highScores));
+    }
+    showVictoryPage(moveCount, isHighScore);
+}
+
+function showVictoryPage(moves, isHighScore) {
+    document.getElementById('finalMoves').textContent = moves;
+    document.getElementById('victoryHighScore').textContent = 
+        isHighScore ? '🏆 New High Score!' : `High Score: ${highScores[gameType][difficulty]}`;
+    
+    showPage('victoryPage');
+    
+    // Trigger celebration animations
+    const tl = gsap.timeline();
+    
+    // Trophy animation
+    tl.from('.trophy', {
+        scale: 0,
+        rotation: 720,
+        duration: 1,
+        ease: 'back.out(1.7)'
+    });
+    
+    // Stats animation
+    tl.from('.victory-stats .stat-item', {
+        y: 50,
+        opacity: 0,
+        stagger: 0.2,
+        duration: 0.5,
+        ease: 'back.out(1.2)'
+    }, '-=0.5');
+    
+    // Button animation
+    tl.from('.victory-buttons button', {
+        scale: 0,
+        stagger: 0.2,
+        duration: 0.5,
+        ease: 'back.out(1.2)'
+    }, '-=0.3');
+    
+    // Confetti effect
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize game type buttons
+    document.querySelectorAll('.game-type').forEach(btn => {
+        btn.addEventListener('click', () => {
+            setGameType(btn.dataset.type);
+            // Update active state visually
+            document.querySelectorAll('.game-type').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+    
+    // Initialize difficulty buttons
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            setDifficulty(btn.dataset.difficulty);
+            // Update active state visually
+            document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+    
+    // Start button
+    document.getElementById('startBtn').addEventListener('click', () => {
+        showPage('selectionPage');
+    });
+    
+    // Play button
+    document.getElementById('playBtn').addEventListener('click', () => {
+        showPage('gamePage');
+    });
+    
+    // Reset and menu buttons
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        playSound('button');
+        initializeGame();
+    });
+    
+    document.getElementById('menuBtn').addEventListener('click', () => {
+        playSound('button');
+        showPage('welcomePage');
+    });
+    
+    // Victory page buttons
+    document.getElementById('playAgainBtn').addEventListener('click', () => {
+        showPage('gamePage');
+    });
+    
+    document.getElementById('newGameBtn').addEventListener('click', () => {
+        showPage('selectionPage');
+    });
+    
+    // Initialize touch events
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.card')) {
+            e.preventDefault(); // Prevent double-tap zoom
+        }
+    }, { passive: false });
+    
+    // Show welcome page initially
+    showPage('welcomePage');
+});
