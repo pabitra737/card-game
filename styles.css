@@ -44,8 +44,13 @@ body {
     position: relative;
     width: 100%;
     max-width: 1000px;
-    margin: 20px;
+    margin: 0;
+    padding: 20px;
     z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 /* Glass Morphism */
@@ -212,17 +217,21 @@ body {
     backdrop-filter: blur(10px);
     position: relative;
     width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .game-board {
     display: grid;
-    gap: 10px;
-    padding: 20px;
+    gap: 5px;
+    padding: 10px;
     margin: 0 auto;
+    width: 100%;
     max-width: 800px;
     perspective: 1000px;
     overflow: visible;
-    width: 100%;
+    flex: 1;
 }
 
 /* Stats Container Base Styles */
@@ -271,6 +280,7 @@ body {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    will-change: transform;
 }
 
 .card.flipped {
@@ -299,6 +309,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
     transform-style: preserve-3d;
     pointer-events: none;
+    will-change: transform;
 }
 
 .card-front {
@@ -417,21 +428,22 @@ body {
 
     .game-container {
         padding: 10px;
-        max-height: none;
-        margin-bottom: 0;
+        height: 100%;
         display: flex;
         flex-direction: column;
         border-radius: 20px;
     }
 
     .game-board {
-        gap: 8px;
-        padding: 10px;
+        gap: 4px;
+        padding: 8px;
         order: 1;
-        margin-bottom: 20px;
-        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        margin-bottom: 15px;
+        grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
         touch-action: none;
         -webkit-overflow-scrolling: touch;
+        height: auto;
+        flex: 1;
     }
 
     .stats-container {
@@ -441,26 +453,31 @@ body {
         left: auto;
         transform: none;
         background: rgba(0, 0, 0, 0.8);
-        padding: 10px;
+        padding: 8px;
         border-radius: 20px;
-        margin: 0 10px 10px;
-        gap: 10px;
+        margin: 0 8px 8px;
+        gap: 8px;
         backdrop-filter: blur(10px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-        width: calc(100% - 20px);
+        grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+        width: calc(100% - 16px);
+        touch-action: none;
     }
 
     .page {
-        height: auto;
-        overflow-y: visible;
-        padding-bottom: 20px;
+        padding: 10px;
+        min-height: 100vh;
+        height: 100%;
+        overflow: hidden;
     }
 
     body {
-        position: relative;
-        overflow-y: auto;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        touch-action: none;
     }
 
     .stat-box {
@@ -475,9 +492,8 @@ body {
     }
 
     .card {
-        min-height: unset;
-        aspect-ratio: 1;
         touch-action: none;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .card-front, .card-back {
@@ -494,9 +510,11 @@ body {
 
 @media (max-width: 480px) {
     .stats-container {
-        padding: 8px;
-        gap: 6px;
-        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        padding: 4px;
+        gap: 4px;
+        grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+        margin: 0 4px 4px;
+        width: calc(100% - 8px);
     }
 
     .stat-box {
@@ -520,14 +538,14 @@ body {
     }
 
     .game-container {
-        padding: 8px;
+        padding: 4px;
     }
 
     .game-board {
-        gap: 6px;
-        padding: 6px;
-        margin-bottom: 15px;
-        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 3px;
+        padding: 5px;
+        margin-bottom: 8px;
+        grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
         touch-action: none;
     }
 
