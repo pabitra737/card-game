@@ -264,9 +264,13 @@ body {
     transform-style: preserve-3d;
     transition: transform 0.6s;
     width: 100%;
-    touch-action: manipulation;
+    touch-action: none;
     -webkit-tap-highlight-color: transparent;
     perspective: 1000px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .card.flipped {
@@ -294,6 +298,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transform-style: preserve-3d;
+    pointer-events: none;
 }
 
 .card-front {
@@ -425,6 +430,8 @@ body {
         order: 1;
         margin-bottom: 20px;
         grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        touch-action: none;
+        -webkit-overflow-scrolling: touch;
     }
 
     .stats-container {
@@ -470,10 +477,13 @@ body {
     .card {
         min-height: unset;
         aspect-ratio: 1;
+        touch-action: none;
     }
 
     .card-front, .card-back {
         font-size: calc(14px + 1vw);
+        pointer-events: none;
+        touch-action: none;
     }
 
     #resetBtn, #menuBtn {
@@ -518,10 +528,16 @@ body {
         padding: 6px;
         margin-bottom: 15px;
         grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        touch-action: none;
+    }
+
+    .card {
+        touch-action: none;
     }
 
     .card-front, .card-back {
         font-size: calc(12px + 1vw);
+        pointer-events: none;
     }
 }
 
