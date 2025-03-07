@@ -211,6 +211,7 @@ body {
     border-radius: 30px;
     backdrop-filter: blur(10px);
     position: relative;
+    width: 100%;
 }
 
 .game-board {
@@ -220,14 +221,19 @@ body {
     margin: 0 auto;
     max-width: 800px;
     perspective: 1000px;
+    overflow: visible;
+    width: 100%;
 }
 
+/* Stats Container Base Styles */
 .stats-container {
     display: flex;
     justify-content: center;
     gap: 30px;
     margin-bottom: 30px;
     flex-wrap: wrap;
+    width: 100%;
+    z-index: 100;
 }
 
 .stat-box {
@@ -257,7 +263,7 @@ body {
     cursor: pointer;
     transform-style: preserve-3d;
     transition: transform 0.6s;
-    min-height: 80px;
+    width: 100%;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     perspective: 1000px;
@@ -406,69 +412,86 @@ body {
 
     .game-container {
         padding: 10px;
+        max-height: none;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        border-radius: 20px;
+    }
+
+    .game-board {
+        gap: 8px;
+        padding: 10px;
+        order: 1;
+        margin-bottom: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
     }
 
     .stats-container {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
+        order: 2;
+        position: relative;
+        bottom: auto;
+        left: auto;
+        transform: none;
         background: rgba(0, 0, 0, 0.8);
         padding: 10px;
-        border-radius: 50px;
-        margin: 0;
-        z-index: 100;
-        width: auto;
-        display: flex;
-        gap: 15px;
+        border-radius: 20px;
+        margin: 0 10px 10px;
+        gap: 10px;
         backdrop-filter: blur(10px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+        width: calc(100% - 20px);
+    }
+
+    .page {
+        height: auto;
+        overflow-y: visible;
+        padding-bottom: 20px;
+    }
+
+    body {
+        position: relative;
+        overflow-y: auto;
     }
 
     .stat-box {
-        min-width: auto;
-        padding: 8px 15px;
+        min-width: unset;
+        padding: 8px;
         background: none;
-        flex-direction: row;
-        gap: 8px;
+        flex-direction: column;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
 
-    .stat-label {
-        font-size: 0.8em;
+    .card {
+        min-height: unset;
+        aspect-ratio: 1;
     }
 
-    .stat-value {
-        font-size: 1.2em;
+    .card-front, .card-back {
+        font-size: calc(14px + 1vw);
     }
 
     #resetBtn, #menuBtn {
         padding: 8px 15px;
         font-size: 0.9em;
     }
-
-    .game-board {
-        gap: 8px;
-        padding: 10px;
-        margin-bottom: 80px; /* Space for fixed stats container */
-    }
-
-    .card {
-        min-height: 60px;
-    }
-
-    .card-front, .card-back {
-        font-size: 1.2em;
-    }
 }
 
 @media (max-width: 480px) {
     .stats-container {
         padding: 8px;
-        gap: 10px;
+        gap: 6px;
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
     }
 
     .stat-box {
-        padding: 5px 10px;
+        padding: 4px;
+        gap: 2px;
     }
 
     .stat-label {
@@ -476,26 +499,29 @@ body {
     }
 
     .stat-value {
-        font-size: 1em;
+        font-size: 0.9em;
     }
 
     #resetBtn, #menuBtn {
-        padding: 5px 10px;
+        padding: 6px 12px;
         font-size: 0.8em;
+        width: 100%;
+        margin: 2px 0;
+    }
+
+    .game-container {
+        padding: 8px;
     }
 
     .game-board {
         gap: 6px;
-        padding: 8px;
-        margin-bottom: 70px;
-    }
-
-    .card {
-        min-height: 50px;
+        padding: 6px;
+        margin-bottom: 15px;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
     }
 
     .card-front, .card-back {
-        font-size: 1em;
+        font-size: calc(12px + 1vw);
     }
 }
 
