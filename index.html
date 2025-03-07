@@ -60,16 +60,19 @@
                             <span class="icon">🌟</span>
                             <span class="text">Easy</span>
                             <span class="sub-text">4x4 grid (8 pairs)</span>
+                            <span class="move-limit">Move Limit: 20</span>
                         </button>
                         <button class="diff-btn" data-difficulty="medium">
                             <span class="icon">🌟🌟</span>
                             <span class="text">Medium</span>
                             <span class="sub-text">6x6 grid (18 pairs)</span>
+                            <span class="move-limit">Move Limit: 40</span>
                         </button>
                         <button class="diff-btn" data-difficulty="hard">
                             <span class="icon">🌟🌟🌟</span>
                             <span class="text">Hard</span>
                             <span class="sub-text">8x8 grid (32 pairs)</span>
+                            <span class="move-limit">Move Limit: 60</span>
                         </button>
                     </div>
                 </div>
@@ -90,6 +93,10 @@
                     <span id="moveCount" class="stat-value">0</span>
                 </div>
                 <div class="stat-box">
+                    <span class="stat-label">Moves Left</span>
+                    <span id="movesLeft" class="stat-value">-</span>
+                </div>
+                <div class="stat-box">
                     <span class="stat-label">High Score</span>
                     <span id="highScore" class="stat-value">-</span>
                 </div>
@@ -106,32 +113,63 @@
         </div>
     </div>
 
-    <!-- Victory Page -->
-    <div id="victoryPage" class="page" style="display: none;">
-        <div class="victory-content animate__animated animate__zoomIn">
-            <div class="trophy-container">
-                <div class="trophy">🏆</div>
-                <div class="trophy-sparkles"></div>
-            </div>
-            <h2 class="game-title">Victory!</h2>
-            <div class="victory-stats">
+    <!-- Game Over Page -->
+    <div id="gameOverPage" class="page" style="display: none;">
+        <div class="game-over-content glass-effect">
+            <h2 class="game-over-title">Game Over!</h2>
+            <div class="game-over-stats">
                 <div class="stat-item">
-                    <div class="label">Total Moves</div>
-                    <div id="finalMoves" class="value">0</div>
+                    <div class="label">Moves Made</div>
+                    <div class="value" id="finalMoves">0</div>
                 </div>
                 <div class="stat-item">
-                    <div class="label">Score</div>
-                    <div id="victoryHighScore" class="value">High Score: 0</div>
+                    <div class="label">Move Limit</div>
+                    <div class="value" id="moveLimit">0</div>
+                </div>
+            </div>
+            <div class="game-over-buttons">
+                <button id="retryBtn" class="btn-primary">
+                    <span class="btn-shine"></span>
+                    Restart Game
+                </button>
+                <button id="gameOverMenuBtn" class="btn-primary">
+                    <span class="btn-shine"></span>
+                    Main Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Page -->
+    <div id="victoryPage" class="page" style="display: none;">
+        <div class="victory-content glass-effect">
+            <div class="trophy-container">
+                <div class="trophy">🏆</div>
+                <div class="trophy-sparkles">✨</div>
+            </div>
+            <h2>Congratulations!</h2>
+            <div class="victory-stats">
+                <div class="stat-item">
+                    <div class="label">Moves</div>
+                    <div class="value" id="finalMoves">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">High Score</div>
+                    <div class="value" id="victoryHighScore">-</div>
                 </div>
             </div>
             <div class="victory-buttons">
                 <button id="playAgainBtn" class="btn-primary">
-                    Play Again
-                    <div class="btn-shine"></div>
+                    <span class="btn-shine"></span>
+                    Restart Game
                 </button>
                 <button id="newGameBtn" class="btn-primary">
+                    <span class="btn-shine"></span>
                     New Game
-                    <div class="btn-shine"></div>
+                </button>
+                <button id="victoryMenuBtn" class="btn-primary">
+                    <span class="btn-shine"></span>
+                    Main Menu
                 </button>
             </div>
         </div>

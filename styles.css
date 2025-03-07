@@ -126,11 +126,17 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    min-width: 200px;
 }
 
 .btn-primary:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
 .btn-shine {
@@ -226,6 +232,9 @@ body {
     flex-direction: column;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    margin: 0 auto;
+    max-width: 800px;
+    z-index: 1;
 }
 
 .game-board {
@@ -246,36 +255,49 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    position: relative;
+    z-index: 2;
+    min-height: 300px;
+    grid-template-columns: repeat(4, 1fr);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
 }
 
 /* Stats Container Base Styles */
 .stats-container {
     display: flex;
     justify-content: center;
-    gap: 30px;
-    margin-bottom: 30px;
+    gap: 15px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
     width: 100%;
     z-index: 100;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
 }
 
 .stat-box {
     background: rgba(255, 255, 255, 0.1);
-    padding: 15px 30px;
-    border-radius: 15px;
+    padding: 12px 20px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 150px;
+    min-width: 120px;
+    flex: 1;
+    max-width: 150px;
 }
 
 .stat-label {
     font-size: 0.9em;
     opacity: 0.8;
+    margin-bottom: 4px;
 }
 
 .stat-value {
-    font-size: 1.5em;
+    font-size: 1.4em;
     font-weight: 600;
 }
 
@@ -285,8 +307,9 @@ body {
     position: relative;
     cursor: pointer;
     transform-style: preserve-3d;
-    transition: transform 0.6s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     width: 100%;
+    min-width: 60px;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     perspective: 1000px;
@@ -296,11 +319,10 @@ body {
     -ms-user-select: none;
     will-change: transform;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    margin: 0;
+    padding: 0;
+    display: block;
+    visibility: visible;
 }
 
 .card.flipped {
@@ -324,18 +346,15 @@ body {
     justify-content: center;
     align-items: center;
     font-size: 2em;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     transform-style: preserve-3d;
     pointer-events: none;
     will-change: transform;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(5px);
 }
 
 .card-front {
@@ -343,15 +362,40 @@ body {
     color: white;
     font-weight: 600;
     transform: rotateY(180deg);
-}
-
-.card-front.color-card {
-    background: none;
+    box-shadow: 
+        0 8px 16px rgba(0, 0, 0, 0.2),
+        inset 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .card-back {
     background: linear-gradient(135deg, rgba(66, 165, 245, 0.9), rgba(30, 136, 229, 0.9));
     transform: rotateY(0deg);
+    box-shadow: 
+        0 8px 16px rgba(0, 0, 0, 0.2),
+        inset 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.card:hover .card-back {
+    transform: rotateY(0deg) scale(1.05);
+    box-shadow: 
+        0 12px 24px rgba(0, 0, 0, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.card:hover .card-front {
+    transform: rotateY(180deg) scale(1.05);
+    box-shadow: 
+        0 12px 24px rgba(0, 0, 0, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.color-swatch {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    display: block;
+    visibility: visible;
+    transition: all 0.3s ease;
 }
 
 /* For Safari and other webkit browsers */
@@ -377,14 +421,141 @@ body {
         box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
     }
     70% {
-        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+        box-shadow: 0 0 0 15px rgba(76, 175, 80, 0);
     }
     100% {
         box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
     }
 }
 
-/* Victory Page */
+/* Game Over Page */
+.game-over-content {
+    text-align: center;
+    padding: 60px 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.game-over-title {
+    font-size: 3em;
+    color: #ff6b6b;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-over-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 40px 0;
+}
+
+.game-over-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    z-index: 1002;
+    opacity: 1 !important;
+    position: relative;
+}
+
+.game-over-buttons button {
+    min-width: 200px;
+    position: relative;
+    z-index: 1003;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background: linear-gradient(45deg, #4CAF50, #45b7d1);
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: scale(1) !important;
+}
+
+.game-over-buttons button:hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-over-buttons button:active {
+    transform: translateY(1px) scale(0.95) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#retryBtn {
+    background: linear-gradient(45deg, #4CAF50, #45b7d1);
+    font-weight: bold;
+}
+
+#gameOverMenuBtn {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    font-weight: bold;
+}
+
+/* Ensure game over page and its content are visible */
+#gameOverPage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    opacity: 1 !important;
+}
+
+.game-over-content {
+    position: relative;
+    z-index: 1001;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 40px;
+    max-width: 90%;
+    width: 500px;
+    text-align: center;
+    opacity: 1 !important;
+    transform: scale(1) !important;
+}
+
+/* Animation for game over buttons */
+@keyframes buttonPopIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.game-over-buttons button {
+    animation: buttonPopIn 0.5s ease-out forwards;
+    animation-delay: 0.3s;
+}
+
+.game-over-buttons button:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+/* Victory Page Updates */
 .victory-content {
     text-align: center;
     padding: 60px 40px;
@@ -393,56 +564,123 @@ body {
     backdrop-filter: blur(10px);
 }
 
-.trophy-container {
-    position: relative;
-    margin-bottom: 30px;
+.victory-content h2 {
+    font-size: 3em;
+    color: #4ecdc4;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.trophy {
-    font-size: 80px;
-    animation: floatTrophy 3s ease-in-out infinite;
-}
-
-@keyframes floatTrophy {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-}
-
-.trophy-sparkles {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    animation: sparkleRotate 4s linear infinite;
-}
-
-@keyframes sparkleRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.victory-stats {
+.victory-buttons {
     display: flex;
     justify-content: center;
-    gap: 40px;
-    margin: 40px 0;
+    gap: 20px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    z-index: 1002;
+    opacity: 1 !important;
+    position: relative;
 }
 
-.stat-item {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 15px;
+.victory-buttons button {
     min-width: 200px;
+    position: relative;
+    z-index: 1003;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background: linear-gradient(45deg, #4CAF50, #45b7d1);
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: scale(1) !important;
 }
 
-.stat-item .value {
-    font-size: 2em;
-    font-weight: 700;
-    color: #4ecdc4;
+.victory-buttons button:hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Responsive Design */
+.victory-buttons button:active {
+    transform: translateY(1px) scale(0.95) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#playAgainBtn {
+    background: linear-gradient(45deg, #4CAF50, #45b7d1);
+    font-weight: bold;
+}
+
+#newGameBtn,
+#victoryMenuBtn {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    font-weight: bold;
+}
+
+/* Ensure victory page and its content are visible */
+#victoryPage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    opacity: 1 !important;
+}
+
+.victory-content {
+    position: relative;
+    z-index: 1001;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 40px;
+    max-width: 90%;
+    width: 500px;
+    text-align: center;
+    opacity: 1 !important;
+    transform: scale(1) !important;
+}
+
+/* Animation for victory buttons */
+@keyframes victoryButtonPopIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.victory-buttons button {
+    animation: victoryButtonPopIn 0.5s ease-out forwards;
+    animation-delay: 0.3s;
+}
+
+.victory-buttons button:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.victory-buttons button:nth-child(3) {
+    animation-delay: 0.7s;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -463,14 +701,8 @@ body {
 
     .game-container {
         padding: 10px;
-        height: auto;
-        min-height: auto;
-        display: flex;
-        flex-direction: column;
-        border-radius: 20px;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        touch-action: manipulation;
+        margin: 10px;
+        width: calc(100% - 20px);
     }
 
     .game-board {
@@ -478,11 +710,14 @@ body {
         padding: 8px;
         order: 1;
         margin-bottom: 15px;
-        grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         touch-action: manipulation;
         -webkit-overflow-scrolling: touch;
         height: auto;
         flex: 1;
+        position: relative;
+        z-index: 1;
+        min-height: 250px;
     }
 
     .stats-container {
@@ -513,14 +748,50 @@ body {
     }
 
     .card {
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
+        min-width: 45px;
     }
 
     .card-front, .card-back {
         font-size: calc(14px + 1vw);
-        pointer-events: none;
-        touch-action: manipulation;
+        border-radius: 10px;
+    }
+
+    .game-over-content,
+    .victory-content {
+        padding: 40px 20px;
+    }
+
+    .game-over-title,
+    .victory-content h2 {
+        font-size: 2.5em;
+    }
+
+    .game-over-stats,
+    .victory-stats {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .game-over-buttons,
+    .victory-buttons {
+        flex-direction: column;
+        gap: 15px;
+        padding: 0 20px;
+    }
+
+    .game-over-buttons button,
+    .victory-buttons button {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+        min-width: unset;
+    }
+
+    .btn-primary {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+        min-width: unset;
     }
 }
 
@@ -535,14 +806,18 @@ body {
 
     .game-container {
         padding: 5px;
+        margin: 5px;
+        width: calc(100% - 10px);
     }
 
     .game-board {
         gap: 3px;
         padding: 5px;
         margin-bottom: 8px;
-        grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         touch-action: manipulation;
+        z-index: 1;
+        min-height: 200px;
     }
 
     .stats-container {
@@ -565,19 +840,31 @@ body {
     }
 
     .card {
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
+        min-width: 40px;
     }
 
     .card-front, .card-back {
         font-size: calc(12px + 1vw);
-        pointer-events: none;
-        touch-action: manipulation;
+        border-radius: 8px;
     }
 
-    #resetBtn, #menuBtn {
-        padding: 8px 15px;
-        font-size: 0.9em;
+    .game-over-content,
+    .victory-content {
+        padding: 30px 15px;
+    }
+
+    .game-over-title,
+    .victory-content h2 {
+        font-size: 2em;
+    }
+
+    .stat-item {
+        padding: 15px;
+    }
+
+    .btn-primary {
+        padding: 12px 25px;
+        font-size: 1em;
     }
 }
 
@@ -701,16 +988,16 @@ body {
     25% {
         transform: translateY(25vh) rotate(90deg) translateX(var(--tx));
         opacity: 1;
-    }
-    50% {
+        }
+        50% {
         transform: translateY(50vh) rotate(180deg) translateX(calc(var(--tx) * -1));
         opacity: 0.8;
     }
     75% {
         transform: translateY(75vh) rotate(270deg) translateX(var(--tx));
         opacity: 0.6;
-    }
-    100% {
+        }
+        100% {
         transform: translateY(100vh) rotate(360deg);
         opacity: 0;
     }
@@ -851,4 +1138,177 @@ body {
 
 .page[style*="display: none"] {
     opacity: 0;
+}
+
+.move-limit {
+    font-size: 0.8em;
+    color: #4ecdc4;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.game-over-buttons,
+.victory-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    z-index: 1002;
+    opacity: 1 !important;
+    position: relative;
+}
+
+.game-over-buttons button,
+.victory-buttons button {
+    min-width: 200px;
+    position: relative;
+    z-index: 1003;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background: linear-gradient(45deg, #4CAF50, #45b7d1);
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.game-over-buttons button:hover,
+.victory-buttons button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-over-buttons button:active,
+.victory-buttons button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#retryBtn,
+#playAgainBtn {
+    background: linear-gradient(45deg, #4CAF50, #45b7d1);
+    font-weight: bold;
+}
+
+#gameOverMenuBtn,
+#newGameBtn,
+#victoryMenuBtn {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    font-weight: bold;
+}
+
+/* Ensure buttons are visible on game over and victory pages */
+#gameOverPage,
+#victoryPage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    opacity: 1 !important;
+}
+
+.game-over-content,
+.victory-content {
+    position: relative;
+    z-index: 1001;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 40px;
+    max-width: 90%;
+    width: 500px;
+    text-align: center;
+    opacity: 1 !important;
+}
+
+.game-over-buttons,
+.victory-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    z-index: 1002;
+    opacity: 1 !important;
+}
+
+.game-over-buttons button,
+.victory-buttons button {
+    min-width: 200px;
+    position: relative;
+    z-index: 1003;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Responsive adjustments for stats container */
+@media (max-width: 768px) {
+    .stats-container {
+        gap: 10px;
+        padding: 8px;
+        margin-bottom: 15px;
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-box {
+        padding: 8px 12px;
+        min-width: 100px;
+        max-width: 120px;
+    }
+
+    .stat-label {
+        font-size: 0.8em;
+    }
+
+    .stat-value {
+        font-size: 1.2em;
+    }
+
+    #resetBtn, #menuBtn {
+        padding: 8px 16px;
+        font-size: 0.9em;
+        min-width: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-container {
+        gap: 8px;
+        padding: 6px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stat-box {
+        padding: 6px 10px;
+        min-width: 80px;
+        max-width: 100px;
+    }
+
+    .stat-label {
+        font-size: 0.75em;
+    }
+
+    .stat-value {
+        font-size: 1.1em;
+    }
+
+    #resetBtn, #menuBtn {
+        padding: 6px 12px;
+        font-size: 0.8em;
+        min-width: 80px;
+    }
 } 

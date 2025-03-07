@@ -185,11 +185,19 @@ let highScores = JSON.parse(localStorage.getItem('highScores')) || {
     colors: { easy: Infinity, medium: Infinity, hard: Infinity }
 };
 
+// Utility function to shuffle array
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
 // Game configuration
 const config = {
-    easy: { pairs: 8, cols: 4 },
-    medium: { pairs: 18, cols: 6 },
-    hard: { pairs: 32, cols: 8 }
+    easy: { pairs: 8, cols: 4, moveLimit: 20 },
+    medium: { pairs: 18, cols: 6, moveLimit: 40 },
+    hard: { pairs: 32, cols: 8, moveLimit: 60 }
 };
 
 const gameContent = {
@@ -204,13 +212,30 @@ const gameContent = {
 
 // Page Management
 function showPage(pageId) {
+    // Hide all pages first
     document.querySelectorAll('.page').forEach(page => {
         page.style.display = 'none';
+        page.style.opacity = '0';
     });
-    document.getElementById(pageId).style.display = 'block';
     
-    if (pageId === 'gamePage') {
-        initializeGame();
+    // Show the target page
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.style.display = 'flex';
+        // Use setTimeout to ensure display: flex is applied before opacity
+        setTimeout(() => {
+            targetPage.style.opacity = '1';
+        }, 10);
+        
+        // Initialize game if showing game page
+        if (pageId === 'gamePage') {
+            initializeGame();
+        }
+        
+        // Log for debugging
+        console.log(`Showing page: ${pageId}`);
+    } else {
+        console.error(`Page with id ${pageId} not found`);
     }
 }
 
@@ -234,71 +259,80 @@ function setDifficulty(diff) {
 
 // Game Initialization
 function initializeGame() {
+    // Reset game state
     moveCount = 0;
     matchedPairs = 0;
     flippedCards = [];
     gameStarted = false;
     
-    updateStats();
-    createGameBoard();
-}
-
-function createGameBoard() {
+    // Clear existing game board
     const gameBoard = document.querySelector('.game-board');
-    const { pairs, cols } = config[difficulty];
-    gameBoard.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    if (!gameBoard) {
+        console.error('Game board not found');
+        return;
+    }
     
-    // Create card content
-    let content = gameContent[gameType].slice(0, pairs);
-    content = [...content, ...content];
-    content.sort(() => Math.random() - 0.5);
-    
-    // Clear existing board
+    // Clear existing content
     gameBoard.innerHTML = '';
     
+    // Set up the grid layout based on difficulty
+    const gridSize = config[difficulty].cols;
+    gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    
+    // Create card content by duplicating and shuffling
+    const cardContent = [...gameContent[gameType]];
+    // Only take the number of cards needed for the current difficulty
+    const neededCards = config[difficulty].pairs * 2;
+    const selectedContent = cardContent.slice(0, neededCards / 2);
+    const duplicatedContent = [...selectedContent, ...selectedContent];
+    shuffleArray(duplicatedContent);
+    
+    console.log(`Creating ${neededCards} cards for ${difficulty} difficulty`);
+    
     // Create cards
-    content.forEach((value, index) => {
+    duplicatedContent.forEach((content, index) => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.dataset.index = index;
-        card.dataset.value = value;
+        card.dataset.value = content;
         
-        const front = document.createElement('div');
-        front.className = 'card-front';
+        // Create card back
+        const cardBack = document.createElement('div');
+        cardBack.className = 'card-back';
+        cardBack.innerHTML = '?';
         
-        const back = document.createElement('div');
-        back.className = 'card-back';
-        back.innerHTML = '❓';
+        // Create card front
+        const cardFront = document.createElement('div');
+        cardFront.className = 'card-front';
         
-        // Set content based on game type
         if (gameType === 'colors') {
-            front.classList.add('color-card');
-            front.style.backgroundColor = value;
-            
-            // Add color swatch container
             const colorSwatch = document.createElement('div');
-            colorSwatch.style.width = '100%';
-            colorSwatch.style.height = '100%';
-            colorSwatch.style.backgroundColor = value;
-            colorSwatch.style.borderRadius = 'inherit';
-            front.appendChild(colorSwatch);
+            colorSwatch.className = 'color-swatch';
+            colorSwatch.style.backgroundColor = content;
+            cardFront.appendChild(colorSwatch);
         } else {
             const contentSpan = document.createElement('span');
-            contentSpan.textContent = value;
+            contentSpan.textContent = content;
             contentSpan.style.pointerEvents = 'none';
-            front.appendChild(contentSpan);
+            cardFront.appendChild(contentSpan);
         }
         
-        card.appendChild(back);
-        card.appendChild(front);
-        
-        // Add click event
+        // Add event listeners
         card.addEventListener('click', () => handleCardClick(card));
+        card.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleCardClick(card);
+        }, { passive: false });
         
+        // Append card faces
+        card.appendChild(cardBack);
+        card.appendChild(cardFront);
         gameBoard.appendChild(card);
     });
     
+    // Update cards array and stats
     cards = Array.from(document.querySelectorAll('.card'));
+    console.log('Cards created:', cards.length);
+    updateStats();
 }
 
 // Card Click Handler
@@ -307,7 +341,7 @@ function handleCardClick(card) {
         gameStarted = true;
         updateStats();
     }
-    
+
     if (
         flippedCards.length >= 2 ||
         flippedCards.includes(card) ||
@@ -315,7 +349,7 @@ function handleCardClick(card) {
     ) {
         return;
     }
-    
+
     playSound('flip');
     card.classList.add('flipped');
     flippedCards.push(card);
@@ -331,7 +365,7 @@ function handleCardClick(card) {
 function checkMatch() {
     const [card1, card2] = flippedCards;
     const match = isMatch(card1, card2);
-    
+
     if (match) {
         handleMatch(card1, card2);
     } else {
@@ -341,8 +375,8 @@ function checkMatch() {
 
 function isMatch(card1, card2) {
     if (gameType === 'colors') {
-        const color1 = card1.querySelector('.color-card').style.backgroundColor;
-        const color2 = card2.querySelector('.color-card').style.backgroundColor;
+        const color1 = card1.querySelector('.color-swatch').style.backgroundColor;
+        const color2 = card2.querySelector('.color-swatch').style.backgroundColor;
         return color1 === color2;
     }
     return card1.dataset.value === card2.dataset.value;
@@ -354,32 +388,87 @@ function getCardValue(card) {
 
 function handleMatch(card1, card2) {
     playSound('match');
-    card1.classList.add('matched');
-    card2.classList.add('matched');
+        card1.classList.add('matched');
+        card2.classList.add('matched');
     matchedPairs++;
     flippedCards = [];
     
     if (matchedPairs === config[difficulty].pairs) {
-        setTimeout(() => {
-            playSound('victory');
+            setTimeout(() => {
+                playSound('victory');
             handleVictory();
-        }, 500);
-    }
+            }, 500);
+        }
 }
 
 function handleMismatch(card1, card2) {
-    setTimeout(() => {
-        card1.classList.remove('flipped');
-        card2.classList.remove('flipped');
+        setTimeout(() => {
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
         flippedCards = [];
-    }, 1000);
-}
+        }, 1000);
+    }
 
 // Stats Update
 function updateStats() {
     document.getElementById('moveCount').textContent = moveCount;
     const highScore = highScores[gameType][difficulty];
     document.getElementById('highScore').textContent = highScore === Infinity ? '-' : highScore;
+    
+    // Update moves remaining
+    const movesLeft = config[difficulty].moveLimit - moveCount;
+    document.getElementById('movesLeft').textContent = movesLeft;
+    
+    // Check for move limit
+    if (moveCount >= config[difficulty].moveLimit) {
+        handleGameOver();
+    }
+}
+
+// Game Over Handling
+function handleGameOver() {
+    playSound('gameOver');
+    showGameOverPage();
+}
+
+function showGameOverPage() {
+    document.getElementById('finalMoves').textContent = moveCount;
+    document.getElementById('moveLimit').textContent = config[difficulty].moveLimit;
+    
+    // Ensure the game over page is visible
+    const gameOverPage = document.getElementById('gameOverPage');
+    if (gameOverPage) {
+        gameOverPage.style.display = 'flex';
+        gameOverPage.style.opacity = '1';
+        
+        // Reset any transform styles on buttons
+        const buttons = gameOverPage.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.style.transform = 'scale(1)';
+            button.style.opacity = '1';
+        });
+    }
+    
+    // Trigger game over animations
+    const tl = gsap.timeline();
+    
+    // Stats animation
+    tl.from('.game-over-stats .stat-item', {
+        y: 50,
+        opacity: 0,
+        stagger: 0.2,
+        duration: 0.5,
+        ease: 'back.out(1.2)'
+    });
+    
+    // Button animation
+    tl.from('.game-over-buttons button', {
+        scale: 0,
+        opacity: 0,
+        stagger: 0.2,
+        duration: 0.5,
+        ease: 'back.out(1.2)'
+    }, '-=0.3');
 }
 
 // Victory Handling
@@ -389,15 +478,36 @@ function handleVictory() {
         highScores[gameType][difficulty] = moveCount;
         localStorage.setItem('highScores', JSON.stringify(highScores));
     }
+    console.log('Victory! Moves:', moveCount); // Debug log
     showVictoryPage(moveCount, isHighScore);
 }
 
 function showVictoryPage(moves, isHighScore) {
-    document.getElementById('finalMoves').textContent = moves;
-    document.getElementById('victoryHighScore').textContent = 
-        isHighScore ? '🏆 New High Score!' : `High Score: ${highScores[gameType][difficulty]}`;
+    // Update the moves display
+    const finalMovesElement = document.getElementById('finalMoves');
+    if (finalMovesElement) {
+        finalMovesElement.textContent = moves;
+    }
     
-    showPage('victoryPage');
+    // Update high score display
+    const victoryHighScoreElement = document.getElementById('victoryHighScore');
+    if (victoryHighScoreElement) {
+        victoryHighScoreElement.textContent = isHighScore ? '🏆 New High Score!' : `High Score: ${highScores[gameType][difficulty]}`;
+    }
+    
+    // Ensure the victory page is visible
+    const victoryPage = document.getElementById('victoryPage');
+    if (victoryPage) {
+        victoryPage.style.display = 'flex';
+        victoryPage.style.opacity = '1';
+        
+        // Reset any transform styles on buttons
+        const buttons = victoryPage.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.style.transform = 'scale(1)';
+            button.style.opacity = '1';
+        });
+    }
     
     // Trigger celebration animations
     const tl = gsap.timeline();
@@ -422,6 +532,7 @@ function showVictoryPage(moves, isHighScore) {
     // Button animation
     tl.from('.victory-buttons button', {
         scale: 0,
+        opacity: 0,
         stagger: 0.2,
         duration: 0.5,
         ease: 'back.out(1.2)'
@@ -438,54 +549,114 @@ function showVictoryPage(moves, isHighScore) {
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize game type buttons
-    document.querySelectorAll('.game-type').forEach(btn => {
+    const gameTypeButtons = document.querySelectorAll('.game-type');
+    const difficultyButtons = document.querySelectorAll('.diff-btn');
+    
+    gameTypeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             setGameType(btn.dataset.type);
             // Update active state visually
-            document.querySelectorAll('.game-type').forEach(b => b.classList.remove('active'));
+            gameTypeButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            console.log('Game type set to:', btn.dataset.type);
         });
     });
     
-    // Initialize difficulty buttons
-    document.querySelectorAll('.diff-btn').forEach(btn => {
+    difficultyButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             setDifficulty(btn.dataset.difficulty);
             // Update active state visually
-            document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+            difficultyButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            console.log('Difficulty set to:', btn.dataset.difficulty);
         });
     });
     
     // Start button
-    document.getElementById('startBtn').addEventListener('click', () => {
-        showPage('selectionPage');
-    });
+    const startBtn = document.getElementById('startBtn');
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            console.log('Start button clicked');
+            showPage('selectionPage');
+        });
+    } else {
+        console.error('Start button not found');
+    }
     
     // Play button
-    document.getElementById('playBtn').addEventListener('click', () => {
-        showPage('gamePage');
-    });
+    const playBtn = document.getElementById('playBtn');
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            console.log('Play button clicked');
+            showPage('gamePage');
+        });
+    } else {
+        console.error('Play button not found');
+    }
     
     // Reset and menu buttons
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        playSound('button');
-        initializeGame();
-    });
+    const resetBtn = document.getElementById('resetBtn');
+    const menuBtn = document.getElementById('menuBtn');
     
-    document.getElementById('menuBtn').addEventListener('click', () => {
-        playSound('button');
-        showPage('welcomePage');
-    });
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            playSound('button');
+            initializeGame();
+        });
+    }
+    
+    if (menuBtn) {
+        menuBtn.addEventListener('click', () => {
+            playSound('button');
+            showPage('welcomePage');
+        });
+    }
+    
+    // Game Over page buttons
+    const retryBtn = document.getElementById('retryBtn');
+    const gameOverMenuBtn = document.getElementById('gameOverMenuBtn');
+    
+    if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+            playSound('button');
+            initializeGame();
+            showPage('gamePage');
+        });
+    }
+    
+    if (gameOverMenuBtn) {
+        gameOverMenuBtn.addEventListener('click', () => {
+            playSound('button');
+            showPage('welcomePage');
+        });
+    }
     
     // Victory page buttons
-    document.getElementById('playAgainBtn').addEventListener('click', () => {
-        showPage('gamePage');
-    });
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const newGameBtn = document.getElementById('newGameBtn');
+    const victoryMenuBtn = document.getElementById('victoryMenuBtn');
     
-    document.getElementById('newGameBtn').addEventListener('click', () => {
-        showPage('selectionPage');
-    });
+    if (playAgainBtn) {
+        playAgainBtn.addEventListener('click', () => {
+            playSound('button');
+            initializeGame();
+            showPage('gamePage');
+        });
+    }
+    
+    if (newGameBtn) {
+        newGameBtn.addEventListener('click', () => {
+            playSound('button');
+            showPage('selectionPage');
+        });
+    }
+    
+    if (victoryMenuBtn) {
+        victoryMenuBtn.addEventListener('click', () => {
+            playSound('button');
+            showPage('welcomePage');
+        });
+    }
     
     // Initialize touch events
     document.addEventListener('touchstart', function(e) {
